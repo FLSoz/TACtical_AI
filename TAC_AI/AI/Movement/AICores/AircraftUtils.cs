@@ -70,7 +70,7 @@ namespace TAC_AI.AI.Movement.AICores
             {
                 direct = Vector3.down;
             }
-            else if ((pilot.PerformUTurn > 0 && !pilot.LargeAircraft && !pilot.BankOnly) || pilot.ForcePitchUp)
+            else if ((pilot.PerformUTurn > 0 && !pilot.LargeAircraft && !pilot.PoorThrust) || pilot.ForcePitchUp)
             {
                 // Stay upright
             }
@@ -78,12 +78,12 @@ namespace TAC_AI.AI.Movement.AICores
             {
                 if (pilot.ErrorsInUTurn > 3)    // Aircraft failed Immelmann over 3 times in a row
                     pilot.PerformUTurn = -1;
-                else if (pilot.LargeAircraft || pilot.BankOnly)   // Large aircraft cannot do the Immelmann
+                else if (pilot.LargeAircraft || pilot.PoorThrust)   // Large aircraft cannot do the Immelmann
                     pilot.PerformUTurn = -1;
                 else                            // Perform the Immelmann turn, or better known as the "U-Turn"
                     pilot.PerformUTurn = 1;
             }
-            else if (pilot.LargeAircraft || pilot.BankOnly)
+            else if (pilot.LargeAircraft || pilot.PoorThrust)
             {
                 // Because we likely yaw slower, we should bank as much as possible
                 if (Heading.z < 0.925f - (0.2f / pilot.RollStrength))

@@ -86,7 +86,7 @@ namespace TAC_AI.AI
         public int ErrorsInUTurn = 0;           // If this gets too high, then this tech isn't meant to Immelmann
         public bool DestroyOnTerrain = false;   // Should the aircraft disintegrate on collision with terrain?
         public bool LargeAircraft = false;      // Restrict turning to 45 and no U-Turns
-        public bool BankOnly = false;
+        public bool PoorThrust = false;
         public float MaxBankAngle = 45.0f;
         public float MaxPitchAngle = 80.0f;
         public float TargetHeight;
@@ -268,8 +268,8 @@ namespace TAC_AI.AI
 
             float totalThrust = (fanThrust + boosterThrust * this.BoosterThrustBias);
             float thrustDeficit = (this.NoStallThreshold * this.Tank.rbody.mass * Physics.gravity).sqrMagnitude - totalThrust * totalThrust;
-            this.BankOnly = thrustDeficit > 0;
-            if (this.BankOnly)
+            this.PoorThrust = thrustDeficit > 0;
+            if (this.PoorThrust)
             {
                 this.MaxBankAngle = Mathf.Min(this.MaxBankAngle, 25.0f);
                 this.MaxPitchAngle = Mathf.Min(this.MaxPitchAngle, 45.0f);
@@ -510,37 +510,8 @@ namespace TAC_AI.AI
                     else
                         control.BoostControlJets = thisInst.BOOST;
                 }
-
-                // Still try to move wheels and other things
-                if (this.CurrentThrottle + (this.SlowestPropLerpSpeed * Time.deltaTime) < this.MainThrottle)
-                {
-                    this.CurrentThrottle += this.SlowestPropLerpSpeed * Time.deltaTime;
-                }
-                else if (this.CurrentThrottle - (this.SlowestPropLerpSpeed * Time.deltaTime) > this.MainThrottle)
-                {
-                    this.CurrentThrottle -= this.SlowestPropLerpSpeed * Time.deltaTime;
-                }
-                else
-                {   //Snap
-                    this.CurrentThrottle = this.MainThrottle;
-                }
             }
-            else
-            {
-                if (this.CurrentThrottle + (this.SlowestPropLerpSpeed * Time.deltaTime) < this.MainThrottle)
-                {
-                    this.CurrentThrottle += this.SlowestPropLerpSpeed * Time.deltaTime;
-                }
-                else if (this.CurrentThrottle - (this.SlowestPropLerpSpeed * Time.deltaTime) > this.MainThrottle)
-                {
-                    this.CurrentThrottle -= this.SlowestPropLerpSpeed * Time.deltaTime;
-                }
-                else
-                {   //Snap
-                    this.CurrentThrottle = this.MainThrottle;
-                }
-                this.CurrentThrottle = Mathf.Clamp(this.CurrentThrottle, -1, 1);
-            }
+            this.CurrentThrottle = Mathf.Clamp(Mathf.MoveTowards(this.CurrentThrottle, this.MainThrottle, this.SlowestPropLerpSpeed * Time.deltaTime), -1, 1);
         }
     }
 }

@@ -116,7 +116,7 @@ namespace TAC_AI.AI.Movement.AICores
                         else
                         {   // Moving to target
                             Debug.Log("TACtical_AI: Tech " + tank.name + "  Closing in on target");
-                            if (tank.GetForwardSpeed() < AIControllerAir.Stallspeed + 16)
+                            if (tank.GetForwardSpeed() < AIControllerAir.Stallspeed + 16 || this.pilot.LargeAircraft || this.pilot.PoorThrust)
                                 pilot.AdvisedThrottle = 1;
                             else
                                 pilot.AdvisedThrottle = 0;
@@ -201,7 +201,7 @@ namespace TAC_AI.AI.Movement.AICores
             pilot.AirborneDest = AvoidAssist(pilot.AirborneDest, this.pilot.Tank.boundsCentreWorldNoCheck + (this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness));
             AircraftUtils.AdviseThrottle(pilot, this.pilot.Helper, this.pilot.Tank, pilot.AirborneDest);
 
-            if (pilot.LargeAircraft || pilot.BankOnly)
+            if (pilot.LargeAircraft || pilot.PoorThrust)
             {
                 if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + ((this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime) * 5) - (Vector3.down * AIECore.Extremes(this.pilot.Tank.blockBounds.size)), pilot.AerofoilSluggishness + 25 + this.pilot.TargetHeight))
                 {
@@ -294,7 +294,7 @@ namespace TAC_AI.AI.Movement.AICores
             pilot.AirborneDest = Enemy.RPathfinding.AvoidAssistEnemy(this.pilot.Tank, pilot.AirborneDest, this.pilot.Tank.boundsCentreWorldNoCheck + (this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness), this.pilot.Helper, mind);
             AircraftUtils.AdviseThrottle(pilot, this.pilot.Helper, this.pilot.Tank, pilot.AirborneDest);
 
-            if (pilot.LargeAircraft || pilot.BankOnly)
+            if (pilot.LargeAircraft || pilot.PoorThrust)
             {
                 if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + ((this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime) * 2) - (Vector3.down * AIECore.Extremes(this.pilot.Tank.blockBounds.size)), pilot.AerofoilSluggishness + 25))
                 {
