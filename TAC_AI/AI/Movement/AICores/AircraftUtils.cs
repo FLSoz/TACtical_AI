@@ -220,6 +220,13 @@ namespace TAC_AI.AI.Movement.AICores
             //Turn our work in to processing
             //Debug.Log("TACtical_AI: Tech " + tank.name + " steering" + turnVal);
             control3D.m_State.m_InputMovement = DriveVar;
+            
+            // Force full thrust if it's poor
+            if (pilot.PoorThrust && pilot.CurrentThrottle > 0.5f)
+            {
+                control3D.m_State.m_BoostProps = true;
+            }
+
             if (pilot.SlowestPropLerpSpeed < 0.1f && pilot.PropBias.z > 0.75f && pilot.CurrentThrottle > 0.75f)
                 thisControl.BoostControlProps = true;
             else
