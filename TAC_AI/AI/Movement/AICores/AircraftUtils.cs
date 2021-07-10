@@ -222,7 +222,7 @@ namespace TAC_AI.AI.Movement.AICores
             control3D.m_State.m_InputMovement = DriveVar;
             
             // Force full thrust if it's poor
-            if (pilot.PoorThrust && pilot.CurrentThrottle > 0.5f)
+            if (pilot.PoorThrust || pilot.CurrentThrottle > 0.5f)
             {
                 control3D.m_State.m_BoostProps = true;
             }
