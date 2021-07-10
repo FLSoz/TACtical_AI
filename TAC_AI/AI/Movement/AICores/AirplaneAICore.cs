@@ -94,7 +94,7 @@ namespace TAC_AI.AI.Movement.AICores
                             AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, thisInst.lastDestination);
                         }
                     }
-                    else if (dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
+                    else if (!(pilot.LargeAircraft || pilot.PoorThrust) && dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
                     {   // Launch teh attack run
                         Debug.Log("TACtical_AI: Tech " + tank.name + "  Turning back to face target at dist " + dist);
                         pilot.PerformDiveAttack = 1;
@@ -102,7 +102,7 @@ namespace TAC_AI.AI.Movement.AICores
                     else    // hold off on the U-Turn
                     {
                         pilot.PerformUTurn = 0;
-                        if (Heading.z < 0)
+                        if (Heading.z < 0 && dist < AIControllerAir.GroundAttackStagingDist)
                         {   // Moving away from target
                             Debug.Log("TACtical_AI: Tech " + tank.name + "  Gaining distance for attack run");
                             pilot.MainThrottle = 1;
