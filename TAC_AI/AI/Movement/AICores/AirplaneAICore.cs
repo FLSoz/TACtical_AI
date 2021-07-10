@@ -94,7 +94,7 @@ namespace TAC_AI.AI.Movement.AICores
                             AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, thisInst.lastDestination);
                         }
                     }
-                    else if (!pilot.LargeAircraft && dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
+                    else if (dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
                     {   // Launch teh attack run
                         Debug.Log("TACtical_AI: Tech " + tank.name + "  Turning back to face target at dist " + dist);
                         pilot.PerformDiveAttack = 1;
