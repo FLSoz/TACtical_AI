@@ -94,7 +94,7 @@ namespace TAC_AI.AI.Movement.AICores
                             AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, thisInst.lastDestination);
                         }
                     }
-                    else if (!(pilot.LargeAircraft || pilot.PoorThrust) && dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
+                    else if (!pilot.LargeAircraft && dist > AIControllerAir.GroundAttackStagingDist && Heading.z < 0)
                     {   // Launch teh attack run
                         Debug.Log("TACtical_AI: Tech " + tank.name + "  Turning back to face target at dist " + dist);
                         pilot.PerformDiveAttack = 1;
@@ -102,26 +102,41 @@ namespace TAC_AI.AI.Movement.AICores
                     else    // hold off on the U-Turn
                     {
                         pilot.PerformUTurn = 0;
+                        float adjHeight = pilot.AerofoilSluggishness + 25 + this.pilot.TargetHeight;
+                        Vector3 currPosition = this.pilot.Tank.boundsCentreWorldNoCheck - (Vector3.down * AIECore.Extremes(this.pilot.Tank.blockBounds.size)) / 2;
+                        Vector3 extrapolatedPosition = currPosition + this.pilot.Tank.rbody.velocity * this.pilot.PitchTime;
+                        if (!pilot.ForcePitchUp && !(AIEPathing.AboveHeightFromGround(extrapolatedPosition, adjHeight)))
+                        {
+                            Debug.Log("TACtical_AI: Tech " + tank.name + "  Attacking WILL pitch up");
+                            pilot.ForcePitchUp = true;
+                        }
+
                         if (Heading.z < 0 && dist < AIControllerAir.GroundAttackStagingDist)
                         {   // Moving away from target
-                            Debug.Log("TACtical_AI: Tech " + tank.name + "  Gaining distance for attack run");
+                            Debug.Log($"TACtical_AI: Tech {tank.name}  Gaining distance for attack run. Large Aircraft? {pilot.LargeAircraft}, Poor Thrust? {pilot.PoorThrust}");
                             pilot.MainThrottle = 1;
                             this.pilot.UpdateThrottle(thisInst, thisControl);
                             Vector3 AwayFlat = -Heading;
                             AwayFlat.y = 0;
                             AwayFlat.Normalize();
-                            AwayFlat.y = 0.05f;
+                            AwayFlat.y = pilot.ForcePitchUp ? 200.0f + this.pilot.Tank.transform.position.y : 0.05f;
                             AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + (AwayFlat.normalized * 300));
                         }
                         else
                         {   // Moving to target
-                            Debug.Log("TACtical_AI: Tech " + tank.name + "  Closing in on target");
+                            Debug.Log($"TACtical_AI: Tech {tank.name}  Closing in on target {thisInst.lastDestination}. Large Aircraft? {pilot.LargeAircraft}, Poor Thrust? {pilot.PoorThrust}");
                             if (tank.GetForwardSpeed() < AIControllerAir.Stallspeed + 16 || this.pilot.LargeAircraft || this.pilot.PoorThrust)
                                 pilot.AdvisedThrottle = 1;
                             else
                                 pilot.AdvisedThrottle = 0;
                             this.pilot.UpdateThrottle(thisInst, thisControl);
-                            AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, thisInst.lastDestination);
+                            Vector3 targetDest = thisInst.lastDestination;
+                            if (pilot.ForcePitchUp)
+                            {
+                                targetDest.y = 200.0f + this.pilot.Tank.transform.position.y;
+                            }
+
+                            AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, targetDest);
                         }
                     }
                     return true;
@@ -211,7 +226,7 @@ namespace TAC_AI.AI.Movement.AICores
             }
             else
             {
-                if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + (this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime), pilot.AerofoilSluggishness + 25))
+                if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + (this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime), pilot.AerofoilSluggishness + 25 + this.pilot.TargetHeight))
                 {
                     pilot.ForcePitchUp = true;
                     pilot.AirborneDest += Vector3.up * (pilot.AirborneDest - this.pilot.Tank.boundsCentreWorldNoCheck).magnitude;

@@ -153,10 +153,6 @@ namespace TAC_AI.AI.Movement.AICores
             TankControl.ControlState control3D = (TankControl.ControlState)AircraftUtils.controlGet.GetValue(thisControl);
 
             Vector3 adjTarget = position;
-            if (pilot.ForcePitchUp)
-            {
-                adjTarget += tank.transform.forward;
-            }
             Vector3 clampedForward = adjTarget - tank.boundsCentreWorldNoCheck;
 
             thisInst.Navi3DDirect = clampedForward.normalized;
@@ -166,13 +162,17 @@ namespace TAC_AI.AI.Movement.AICores
             if (targetHeight > 0.0f)
             {
                 clampedForward.y = 0.0f;
+                if (clampedForward.sqrMagnitude < 0.01)
+                {
+                    clampedForward += tank.transform.forward;
+                    clampedForward.y = 0.0f;
+                }
                 clampedForward.y = Mathf.Sign(targetHeight) * Mathf.Min(Mathf.Abs(targetHeight), Mathf.Abs(Mathf.Tan(pilot.MaxPitchAngle * Mathf.Deg2Rad) * clampedForward.magnitude));
                 // Console.WriteLine($"Clamped pitch for {tank.name}, so target of: {clampedForward}");
             }
             // clamp pulling up so no crash
-            if (targetHeight < 0.0f)
+            if (!pilot.ForcePitchUp && targetHeight < 0.0f)
             {
-
             }
             Vector3 localForward = tank.transform.InverseTransformDirection(clampedForward.normalized);
 
@@ -217,36 +217,42 @@ namespace TAC_AI.AI.Movement.AICores
             // DRIVE
             Vector3 DriveVar = Vector3.forward * pilot.CurrentThrottle;
 
-            //Turn our work in to processing
-            //Debug.Log("TACtical_AI: Tech " + tank.name + " steering" + turnVal);
-            control3D.m_State.m_InputMovement = DriveVar;
-
             // Force full thrust if it's poor
-            if (!tank.beam.enabled) {
+            if (!tank.beam.enabled)
+            {
                 if (pilot.PoorThrust || (pilot.SlowestPropLerpSpeed < 0.1f && pilot.PropBias.z > 0.75f && pilot.CurrentThrottle > 0.75f))
                 {
                     thisControl.BoostControlProps = true;
+                    DriveVar.z = 1.0f;
                 }
-                else
+                else if (thisInst.BOOST)
                 {
-                    thisControl.BoostControlProps = false;
+                    thisControl.m_Movement.FireBoosters(tank);
+                    DriveVar.z = 1.0f;
                 }
-
-                if (thisInst.featherBoost)
+                else if (thisInst.featherBoost)
                 {
                     if (thisInst.featherClock >= 25)
                     {
                         if (pilot.CurrentThrottle > 0.5f)
                         {
                             thisControl.m_Movement.FireBoosters(tank);
+                            DriveVar.z = 1.0f;
                         }
                         thisInst.featherClock = 0;
                     }
                     thisInst.featherClock++;
                 }
+                else
+                {
+                    thisControl.BoostControlProps = false;
+                }
             }
 
-            control3D.m_State.m_ThrottleValues.y = thisControl.BoostControlProps || pilot.CurrentThrottle > 0.75f ? 1.0f : pilot.CurrentThrottle;
+            //Turn our work in to processing
+            //Debug.Log("TACtical_AI: Tech " + tank.name + " steering" + turnVal);
+            control3D.m_State.m_InputMovement = DriveVar;
+            control3D.m_State.m_ThrottleValues.z = thisControl.BoostControlProps || DriveVar.z > 0.75f ? 1.0f : DriveVar.z;
 
             controlGet.SetValue(tank.control, control3D);
             return;

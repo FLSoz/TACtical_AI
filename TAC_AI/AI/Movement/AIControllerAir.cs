@@ -88,6 +88,7 @@ namespace TAC_AI.AI
         public bool DestroyOnTerrain = false;   // Should the aircraft disintegrate on collision with terrain?
         public bool LargeAircraft = false;      // Restrict turning to 45 and no U-Turns
         public bool PoorThrust = false;
+        public float PitchTime = 2.0f;
         public float MaxBankAngle = 45.0f;
         public float MaxPitchAngle = 80.0f;
         public float TargetHeight = 20.0f;
