@@ -42,9 +42,9 @@ namespace TAC_AI.AI.Movement.AICores
                     //Debug.Log("TACtical_AI: Tech " + tank.name + "  U-Turn level " + pilot.PerformUTurn + "  throttle " + pilot.CurrentThrottle);
                     pilot.MainThrottle = 1;
                     this.pilot.UpdateThrottle(thisInst, thisControl);
-                    if (tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).z < AIControllerAir.Stallspeed - 4)
+                    if (tank.transform.InverseTransformVector(tank.rbody.velocity).z < AIControllerAir.Stallspeed - 4)
                     {   //ABORT!!!
-                        Debug.Log("TACtical_AI: Tech " + tank.name + "  Aborted U-Turn with velocity " + tank.rootBlockTrans.InverseTransformVector(pilot.Tank.rbody.velocity).z);
+                        Debug.Log("TACtical_AI: Tech " + tank.name + "  Aborted U-Turn with velocity " + tank.transform.InverseTransformVector(pilot.Tank.rbody.velocity).z);
                         pilot.PerformUTurn = -1;
                     }
                     else if (Vector3.Dot(Vector3.down, tank.rbody.velocity.normalized) > 0.4f)
@@ -54,20 +54,20 @@ namespace TAC_AI.AI.Movement.AICores
                     }
                     if (pilot.PerformUTurn == 1)
                     {
-                        AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + tank.rootBlockTrans.forward * 100);
+                        AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + tank.transform.forward * 100);
                         if (pilot.CurrentThrottle > 0.95)
                             pilot.PerformUTurn = 2;
                     }
                     else if (pilot.PerformUTurn == 2)
                     {
                         AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + (Vector3.up * 100));
-                        if (Vector3.Dot(tank.rootBlockTrans.forward, Vector3.up) > 0.75f)
+                        if (Vector3.Dot(tank.transform.forward, Vector3.up) > 0.75f)
                             pilot.PerformUTurn = 3;
                     }
                     else if (pilot.PerformUTurn == 3)
                     {
                         AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, pilot.AirborneDest);
-                        if (Vector3.Dot((pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.6f)
+                        if (Vector3.Dot((pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6f)
                             pilot.PerformUTurn = 0;
                     }
                     return true;
@@ -77,7 +77,7 @@ namespace TAC_AI.AI.Movement.AICores
                     pilot.MainThrottle = 1;
                     this.pilot.UpdateThrottle(thisInst, thisControl);
                     AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, pilot.AirborneDest);
-                    if (Vector3.Dot(tank.rootBlockTrans.forward, (pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized) > 0)
+                    if (Vector3.Dot(tank.transform.forward, (pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized) > 0)
                         pilot.PerformUTurn = 0;
                     return true;
                 }

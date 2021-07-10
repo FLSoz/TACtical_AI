@@ -32,6 +32,7 @@ namespace TAC_AI
         internal static bool isTougherEnemiesPresent = false;
         internal static bool isWeaponAimModPresent = false;
         internal static bool isBlockInjectorPresent = false;
+        internal static bool isControlBlocksPresent = false;
 
         public static int Difficulty = 50;  
         // 50 means the full AI range is used
@@ -50,9 +51,7 @@ namespace TAC_AI
         public static OptionToggle infEnemySupplies;
         public static OptionToggle enemyBaseSpawn;
 
-
         internal static bool firedAfterBlockInjector = false;
-
 
         public static void Main()
         {
@@ -82,6 +81,12 @@ namespace TAC_AI
             {
                 Debug.Log("TACtical_AI: Found WeaponAimMod!  Halting aim-related changes and letting WeaponAimMod take over!");
                 isWeaponAimModPresent = true;
+            }
+
+            if (LookForMod("ControlBlocks"))
+            {
+                Debug.Log("TACtical_AI: Found ControlBlocks!  Special handling of PIDs activated!");
+                isControlBlocksPresent = true;
             }
 
             if (LookForMod("TougherEnemies"))

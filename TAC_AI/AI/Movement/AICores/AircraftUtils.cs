@@ -17,9 +17,9 @@ namespace TAC_AI.AI.Movement.AICores
             //Debug.Log("TACtical_AI: Tech " + tank.name + "  U-Turn level " + pilot.PerformUTurn + "  throttle " + pilot.CurrentThrottle);
             pilot.MainThrottle = 1;
             pilot.UpdateThrottle(thisInst, thisControl);
-            if (tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).z < AIControllerAir.Stallspeed)
+            if (tank.transform.InverseTransformVector(tank.rbody.velocity).z < AIControllerAir.Stallspeed)
             {   //ABORT!!!
-                Debug.Log("TACtical_AI: Tech " + tank.name + "  Aborted U-Turn with velocity " + tank.rootBlockTrans.InverseTransformVector(pilot.Tank.rbody.velocity).z);
+                Debug.Log("TACtical_AI: Tech " + tank.name + "  Aborted U-Turn with velocity " + tank.transform.InverseTransformVector(pilot.Tank.rbody.velocity).z);
                 pilot.PerformUTurn = -1;
                 pilot.ErrorsInUTurn++;
                 if (pilot.ErrorsInUTurn > 3)
@@ -35,20 +35,20 @@ namespace TAC_AI.AI.Movement.AICores
             }
             if (pilot.PerformUTurn == 1)
             {   // Accelerate
-                AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + tank.rootBlockTrans.forward * 100);
+                AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + tank.transform.forward * 100);
                 if (pilot.CurrentThrottle > 0.95)
                     pilot.PerformUTurn = 2;
             }
             else if (pilot.PerformUTurn == 2)
             {   // Pitch Up
                 AngleTowards(thisControl, thisInst, tank, pilot, tank.boundsCentreWorldNoCheck + (Vector3.up * 100));
-                if (Vector3.Dot(tank.rootBlockTrans.forward, Vector3.up) > 0.75f)
+                if (Vector3.Dot(tank.transform.forward, Vector3.up) > 0.75f)
                     pilot.PerformUTurn = 3;
             }
             else if (pilot.PerformUTurn == 3)
             {   // Aim back at target
                 AngleTowards(thisControl, thisInst, tank, pilot, pilot.AirborneDest);
-                if (Vector3.Dot((pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.2f)
+                if (Vector3.Dot((pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.2f)
                 {
                     pilot.ErrorsInUTurn = 0;
                     pilot.PerformUTurn = 0;
@@ -59,11 +59,11 @@ namespace TAC_AI.AI.Movement.AICores
         }
         public static Vector3 DetermineRoll(Tank tank, AIControllerAir pilot, Vector3 Navi3DDirect)
         {
-            //Vector3 turnValUp = Quaternion.LookRotation(tank.rootBlockTrans.forward, tank.rootBlockTrans.InverseTransformDirection(Vector3.up)).eulerAngles;
+            //Vector3 turnValUp = Quaternion.LookRotation(tank.transform.forward, tank.transform.InverseTransformDirection(Vector3.up)).eulerAngles;
 
             if (!AIEPathing.AboveHeightFromGround(tank.boundsCentreWorldNoCheck, AIECore.Extremes(tank.blockBounds.extents) * 2))
                 return Vector3.up;
-            Vector3 Heading = tank.rootBlockTrans.InverseTransformDirection(Navi3DDirect);
+            Vector3 Heading = tank.transform.InverseTransformDirection(Navi3DDirect);
 
             Vector3 direct = Vector3.up;
             if (pilot.PerformUTurn == 3)
@@ -86,53 +86,64 @@ namespace TAC_AI.AI.Movement.AICores
             else if (pilot.LargeAircraft || pilot.BankOnly)
             {
                 // Because we likely yaw slower, we should bank as much as possible
+                if (Heading.z < 0.925f - (0.2f / pilot.RollStrength))
+                {
+                    Vector3 rFlat = tank.transform.right;
+                    rFlat.y = 0.0f;
+                    rFlat.y = Mathf.Sign(Heading.x) * Mathf.Min(pilot.RollStrength, Mathf.Abs(Mathf.Tan(pilot.MaxBankAngle * Mathf.Deg2Rad) * rFlat.magnitude));
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
+                }
+                /*
                 if (Heading.x > 0f && Heading.z < 0.925f - (0.2f / pilot.RollStrength))
                 { // We roll to aim at target
                   //Debug.Log("TACtical_AI: Tech " + tank.name + "  Roll turn Right");
-                    Vector3 rFlat;
-                    if (tank.rootBlockTrans.up.y > 0)
-                        rFlat = tank.rootBlockTrans.right;
-                    else
-                        rFlat = -tank.rootBlockTrans.right;
-                    rFlat.y = -pilot.RollStrength;
-                    direct = Vector3.Cross(tank.rootBlockTrans.forward, rFlat.normalized).normalized;
+                    Vector3 rFlat = tank.transform.right;
+                    rFlat.y = 0.0f;
+                    rFlat.y = Mathf.Min(pilot.RollStrength * Mathf.Abs(Mathf.Tan(pilot.MaxBankAngle * Mathf.Deg2Rad) * rFlat.magnitude));
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
                 }
                 else if (Heading.x < 0f && Heading.z < 0.925f - (0.2f / pilot.RollStrength))
                 { // We roll to aim at target
                   //Debug.Log("TACtical_AI: Tech " + tank.name + "  Roll turn Left");
-                    Vector3 rFlat;
-                    if (tank.rootBlockTrans.up.y > 0)
-                        rFlat = tank.rootBlockTrans.right;
-                    else
-                        rFlat = -tank.rootBlockTrans.right;
-                    rFlat.y = pilot.RollStrength;
-                    direct = Vector3.Cross(tank.rootBlockTrans.forward, rFlat.normalized).normalized;
-                }
+                    Vector3 rFlat = tank.transform.right;
+                    rFlat.y = 0.0f;
+                    rFlat.y = -Mathf.Min(pilot.RollStrength * Mathf.Abs(Mathf.Tan(pilot.MaxBankAngle * Mathf.Deg2Rad) * rFlat.magnitude));
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
+                } */
             }
             else
             {
+                if (Heading.z < 0.85f - (0.2f / pilot.RollStrength)) {
+                    Vector3 rFlat = tank.transform.right;
+                    rFlat.y = 0.0f;
+                    rFlat.y = Mathf.Sign(Heading.x) * Mathf.Min(pilot.RollStrength, Mathf.Abs(Mathf.Tan(pilot.MaxBankAngle * Mathf.Deg2Rad) * rFlat.magnitude));
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
+                }
+
+                /*
                 if (Heading.x > 0f && Heading.z < 0.85f - (0.2f / pilot.RollStrength))
                 { // We roll to aim at target
                   //Debug.Log("TACtical_AI: Tech " + tank.name + "  Roll turn Right");
                     Vector3 rFlat;
-                    if (tank.rootBlockTrans.up.y > 0)
-                        rFlat = tank.rootBlockTrans.right;
+                    if (tank.transform.up.y > 0)
+                        rFlat = tank.transform.right;
                     else
-                        rFlat = -tank.rootBlockTrans.right;
+                        rFlat = -tank.transform.right;
                     rFlat.y = -pilot.RollStrength;
-                    direct = Vector3.Cross(tank.rootBlockTrans.forward, rFlat.normalized).normalized;
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
                 }
                 else if (Heading.x < 0f && Heading.z < 0.85f - (0.2f / pilot.RollStrength))
                 { // We roll to aim at target
                   //Debug.Log("TACtical_AI: Tech " + tank.name + "  Roll turn Left");
                     Vector3 rFlat;
-                    if (tank.rootBlockTrans.up.y > 0)
-                        rFlat = tank.rootBlockTrans.right;
+                    if (tank.transform.up.y > 0)
+                        rFlat = tank.transform.right;
                     else
-                        rFlat = -tank.rootBlockTrans.right;
-                    rFlat.y = pilot.RollStrength;
-                    direct = Vector3.Cross(tank.rootBlockTrans.forward, rFlat.normalized).normalized;
+                        rFlat = -tank.transform.right;
+                    rFlat.y = -pilot.RollStrength;
+                    direct = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
                 }
+                */
             }
             return direct;
         }
@@ -141,12 +152,38 @@ namespace TAC_AI.AI.Movement.AICores
             //AI Steering Rotational
             TankControl.ControlState control3D = (TankControl.ControlState) AircraftUtils.controlGet.GetValue(thisControl);
 
-            thisInst.Navi3DDirect = (position - tank.boundsCentreWorldNoCheck).normalized;
+            Vector3 adjTarget = position;
+            if (pilot.ForcePitchUp)
+            {
+                adjTarget += tank.transform.forward;
+            }
+            Vector3 clampedForward = adjTarget - tank.boundsCentreWorldNoCheck;
+
+            thisInst.Navi3DDirect = clampedForward.normalized;
+            
+            float targetHeight = clampedForward.y;
+            // clamp pitch so no stall
+            if (targetHeight > 0.0f)
+            {
+                clampedForward.y = 0.0f;
+                clampedForward.y = Mathf.Sign(targetHeight) * Mathf.Min(Mathf.Abs(targetHeight), Mathf.Abs(Mathf.Tan(pilot.MaxPitchAngle * Mathf.Deg2Rad) * clampedForward.magnitude));
+                // Console.WriteLine($"Clamped pitch for {tank.name}, so target of: {clampedForward}");
+            }
+            // clamp pulling up so no crash
+            if (targetHeight < 0.0f)
+            {
+
+            }
+            Vector3 localForward = tank.transform.InverseTransformDirection(clampedForward.normalized);
 
             thisInst.Navi3DUp = DetermineRoll(tank, pilot, thisInst.Navi3DDirect);
+            Vector3 localUp = tank.transform.InverseTransformDirection(thisInst.Navi3DUp);
 
-            Vector3 turnVal = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DDirect), tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DUp)).eulerAngles;
-            Vector3 forwardFlat = tank.rootBlockTrans.forward;
+            Quaternion targetRotation = Quaternion.LookRotation(localForward, localUp);
+
+            Vector3 turnVal = targetRotation.eulerAngles;
+
+            Vector3 forwardFlat = tank.transform.forward;
             forwardFlat.y = 0;
 
             //Convert turnVal to runnable format
@@ -188,7 +225,6 @@ namespace TAC_AI.AI.Movement.AICores
             else
                 thisControl.BoostControlProps = false;
 
-
             controlGet.SetValue(tank.control, control3D);
             return;
         }
@@ -198,14 +234,14 @@ namespace TAC_AI.AI.Movement.AICores
             {
                 if (tank.rbody.IsNotNull())
                 {
-                    if (tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).z > AIControllerAir.Stallspeed)
+                    if (tank.transform.InverseTransformVector(tank.rbody.velocity).z > AIControllerAir.Stallspeed)
                     {
                         float ExtAvoid = 32;
                         if (thisInst.lastPlayer.IsNotNull())
                             ExtAvoid = AIECore.Extremes(thisInst.lastPlayer.tank.blockBounds.size);
                         float Extremes = ExtAvoid + AIECore.Extremes(tank.blockBounds.size) + 5;
                         float throttleToSet = 1;
-                        float foreTarg = tank.rootBlockTrans.InverseTransformPoint(target).z;
+                        float foreTarg = tank.transform.InverseTransformPoint(target).z;
 
                         if (foreTarg > 0)
                             throttleToSet = (foreTarg - Extremes) / pilot.PropLerpValue;
@@ -215,14 +251,14 @@ namespace TAC_AI.AI.Movement.AICores
                         {   // Save fuel for chasing the enemy
                             if (pilot.NoProps)
                             {
-                                if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.6)
+                                if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                     thisInst.BOOST = true;
                                 else
                                     thisInst.BOOST = false;
                             }
                             else
                             {
-                                if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.6)
+                                if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                     thisInst.BOOST = true;
                                 else
                                     thisInst.BOOST = false;
@@ -242,10 +278,10 @@ namespace TAC_AI.AI.Movement.AICores
             {
                 if (tank.rbody.IsNotNull())
                 {
-                    if (tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).z > AIControllerAir.Stallspeed)
+                    if (tank.transform.InverseTransformVector(tank.rbody.velocity).z > AIControllerAir.Stallspeed)
                     {
                         float throttleToSet = 1;
-                        float foreTarg = tank.rootBlockTrans.InverseTransformPoint(target.tank.boundsCentreWorldNoCheck).z;
+                        float foreTarg = tank.transform.InverseTransformPoint(target.tank.boundsCentreWorldNoCheck).z;
                         float Extremes = AIECore.Extremes(target.tank.blockBounds.size) + AIECore.Extremes(tank.blockBounds.size) + 5;
                         if (foreTarg > 0)
                             throttleToSet = (foreTarg - Extremes) / pilot.PropLerpValue;
@@ -254,14 +290,14 @@ namespace TAC_AI.AI.Movement.AICores
 
                         if (pilot.NoProps)
                         {
-                            if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.6)
+                            if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                 thisInst.BOOST = true;
                             else
                                 thisInst.BOOST = false;
                         }
                         else
                         {
-                            if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.rootBlockTrans.forward) > 0.6)
+                            if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                 thisInst.BOOST = true;
                             else
                                 thisInst.BOOST = false;
@@ -269,7 +305,7 @@ namespace TAC_AI.AI.Movement.AICores
                         return;
                     }
                     //else
-                    //Debug.Log("TACtical_AI: not fast enough, velocity" + tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).z + " vs " + AIControllerAir.Stallspeed);
+                    //Debug.Log("TACtical_AI: not fast enough, velocity" + tank.transform.InverseTransformVector(tank.rbody.velocity).z + " vs " + AIControllerAir.Stallspeed);
                 }
                 pilot.AdvisedThrottle = 1;
             }

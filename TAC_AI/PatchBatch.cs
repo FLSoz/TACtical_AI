@@ -124,7 +124,7 @@ namespace TAC_AI
                     {
                         Debug.Log("TACtical_AI: Ooop - the special threshold has been met");
                         Tank tankPos = Singleton.Manager<ManTechs>.inst.CurrentTechs.First();
-                        Vector3 spawn = tankPos.boundsCentreWorld + (tankPos.rootBlockTrans.forward * 20);
+                        Vector3 spawn = tankPos.boundsCentreWorld + (tankPos.transform.forward * 20);
                         Singleton.Manager<ManWorld>.inst.GetTerrainHeight(spawn, out float height);
                         spawn.y = height;
                         bool caseOverride = true;
@@ -134,10 +134,10 @@ namespace TAC_AI
                         for (int step = 0; TechCount > step; step++)
                         {
                             Tank tech = tanksToConsider.ElementAt(step);
-                            Vector3 position = tech.boundsCentreWorld - (tech.rootBlockTrans.forward * 32);
+                            Vector3 position = tech.boundsCentreWorld - (tech.transform.forward * 32);
                             position.y += 64;
 
-                            if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), -tech.rootBlockTrans.forward, Templates.BaseTerrain.Air, silentFail: false))
+                            if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), -tech.transform.forward, Templates.BaseTerrain.Air, silentFail: false))
                                 tech.visible.RemoveFromGame();
                         }
 
@@ -154,10 +154,10 @@ namespace TAC_AI
                                 for (int step = 0; TechCount > step; step++)
                                 {
                                     Tank tech = tanksToConsider.ElementAt(step);
-                                    Vector3 position = tech.boundsCentreWorld - (tech.rootBlockTrans.forward * 32);
+                                    Vector3 position = tech.boundsCentreWorld - (tech.transform.forward * 32);
                                     position.y += 64;
 
-                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), -tech.rootBlockTrans.forward, Templates.BaseTerrain.Air, silentFail: false))
+                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), -tech.transform.forward, Templates.BaseTerrain.Air, silentFail: false))
                                         tech.visible.RemoveFromGame();
                                 }
                             }
@@ -166,10 +166,10 @@ namespace TAC_AI
                                 for (int step = 0; TechCount > step; step++)
                                 {
                                     Tank tech = tanksToConsider.ElementAt(step);
-                                    Vector3 position = tech.boundsCentreWorld - (tech.rootBlockTrans.forward * 48);
+                                    Vector3 position = tech.boundsCentreWorld - (tech.transform.forward * 48);
                                     position.y += 64;
 
-                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), tech.rootBlockTrans.forward, Templates.BaseTerrain.Space, silentFail: false))
+                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), tech.transform.forward, Templates.BaseTerrain.Space, silentFail: false))
                                         tech.visible.RemoveFromGame();
                                 }
                             }
@@ -196,10 +196,10 @@ namespace TAC_AI
                                 for (int step = 0; TechCount > step; step++)
                                 {
                                     Tank tech = tanksToConsider.ElementAt(step);
-                                    Vector3 position = tech.boundsCentreWorld - (tech.rootBlockTrans.forward * 10);
+                                    Vector3 position = tech.boundsCentreWorld - (tech.transform.forward * 10);
                                     position.y += 10;
 
-                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), tech.rootBlockTrans.forward, Templates.BaseTerrain.Land))
+                                    if (Templates.RawTechLoader.SpawnAttractTech(position, (int)(UnityEngine.Random.Range(1, 999) + 0.5f), tech.transform.forward, Templates.BaseTerrain.Land))
                                         tech.visible.RemoveFromGame();
                                 }
                                 Templates.RawTechLoader.SpawnAttractTech(spawn, 749, Vector3.forward, Templates.BaseTerrain.Space);

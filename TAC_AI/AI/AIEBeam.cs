@@ -13,7 +13,7 @@ namespace TAC_AI.AI
                 thisInst.BOOST = false;
                 thisInst.featherBoost = false;
                 thisControl.BoostControlJets = false;
-                if (tank.rootBlockTrans.up.y > 0.95f)
+                if (tank.transform.up.y > 0.95f)
                     thisInst.beamClock = 0;
                 else if (thisInst.beamClock > 40)
                 {

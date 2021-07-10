@@ -69,7 +69,7 @@ namespace TAC_AI.AI
         public float CurrentThrottle = 0;               // 
 
         /// <summary> IN m/s !!!</summary>
-        public const float Stallspeed = 25;
+        public const float Stallspeed = 40;
         public const float GroundAttackStagingDist = 250;
 
         //Data Gathering
@@ -87,6 +87,9 @@ namespace TAC_AI.AI
         public bool DestroyOnTerrain = false;   // Should the aircraft disintegrate on collision with terrain?
         public bool LargeAircraft = false;      // Restrict turning to 45 and no U-Turns
         public bool BankOnly = false;
+        public float MaxBankAngle = 45.0f;
+        public float MaxPitchAngle = 80.0f;
+        public float TargetHeight;
         public float BoosterThrustBias = 0.5f;
         public float NoStallThreshold = 1.5f;
         public bool ForcePitchUp = false;
@@ -232,7 +235,7 @@ namespace TAC_AI.AI
                 {
                     if (jet.spinDelta <= 10)
                     {
-                        biasDirection -= Tank.rootBlockTrans.InverseTransformDirection(jet.EffectorForwards);
+                        biasDirection -= Tank.transform.InverseTransformDirection(jet.EffectorForwards);
                         if (jet.spinDelta < lowestDelta)
                             lowestDelta = jet.spinDelta;
                     }
@@ -259,12 +262,18 @@ namespace TAC_AI.AI
                     }
 
                     //We have to get the total thrust in here accounted for as well because the only way we CAN boost is ALL boosters firing!
-                    boostBiasDirection -= Tank.rootBlockTrans.InverseTransformDirection(boost.transform.TransformDirection(boost.LocalBoostDirection)) * force;
+                    boostBiasDirection -= Tank.transform.InverseTransformDirection(boost.transform.TransformDirection(boost.LocalBoostDirection)) * force;
                 }
             }
 
             float totalThrust = (fanThrust + boosterThrust * this.BoosterThrustBias);
-            this.BankOnly = totalThrust * totalThrust < (this.NoStallThreshold * this.Tank.rbody.mass * Physics.gravity).sqrMagnitude;
+            float thrustDeficit = (this.NoStallThreshold * this.Tank.rbody.mass * Physics.gravity).sqrMagnitude - totalThrust * totalThrust;
+            this.BankOnly = thrustDeficit > 0;
+            if (this.BankOnly)
+            {
+                this.MaxBankAngle = Mathf.Min(this.MaxBankAngle, 25.0f);
+                this.MaxPitchAngle = Mathf.Min(this.MaxPitchAngle, 45.0f);
+            }
 
             if (lowestDelta > 10 && boostBiasDirection == Vector3.zero)
             {   //IT HAS NO VALID PROPS OR BOOSTERS!!!!
@@ -308,9 +317,15 @@ namespace TAC_AI.AI
                 }
             }
             if (AIECore.Extremes(Tank.blockBounds.size) > 18)
+            {
                 LargeAircraft = true;
+                MaxBankAngle = Mathf.Min(this.MaxBankAngle, 20.0f);
+                MaxPitchAngle = Mathf.Min(this.MaxPitchAngle, 45.0f);
+            }
             else
+            {
                 LargeAircraft = false;
+            }
 
             AerofoilSluggishness = 30 / aerofoilSpeed;
             if (FlyStyle == FlightType.Helicopter)
@@ -481,14 +496,14 @@ namespace TAC_AI.AI
             {
                 if (this.FlyStyle == FlightType.Aircraft)
                 {
-                    if (this.MainThrottle > 0.1 && this.Tank.rootBlockTrans.InverseTransformVector(this.Tank.rbody.velocity).z < AIControllerAir.Stallspeed + 5 && !this.Tank.beam.IsActive)
+                    if (this.MainThrottle > 0.1 && this.Tank.transform.InverseTransformVector(this.Tank.rbody.velocity).z < AIControllerAir.Stallspeed + 5 && !this.Tank.beam.IsActive)
                         control.BoostControlJets = true;
                     else
                         control.BoostControlJets = thisInst.BOOST;
                 }
                 else // VTOL
                 {
-                    if (this.MainThrottle > 0.1 && this.Tank.rootBlockTrans.InverseTransformVector(this.Tank.rbody.velocity).z < AIControllerAir.Stallspeed + 5 && !this.Tank.beam.IsActive)
+                    if (this.MainThrottle > 0.1 && this.Tank.transform.InverseTransformVector(this.Tank.rbody.velocity).z < AIControllerAir.Stallspeed + 5 && !this.Tank.beam.IsActive)
                         control.BoostControlJets = true;
                     else if (this.MainThrottle > 0.1 && !AIEPathing.AboveHeightFromGround(this.Tank.boundsCentreWorldNoCheck, AIECore.Extremes(this.Tank.blockBounds.extents) * 2) && !this.Tank.beam.IsActive)
                         control.BoostControlJets = true;

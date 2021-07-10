@@ -40,7 +40,7 @@ namespace TAC_AI.Templates
                 return;
             }
 
-            Vector3 pos = (tank.rootBlockTrans.forward * (thisInst.lastTechExtents + 8)) + tank.boundsCentreWorldNoCheck;
+            Vector3 pos = (tank.transform.forward * (thisInst.lastTechExtents + 8)) + tank.boundsCentreWorldNoCheck;
 
             bool validLocation = true;
             foreach (Visible vis in Singleton.Manager<ManVisible>.inst.VisiblesTouchingRadius(pos, thisInst.lastTechExtents, new Bitfield<ObjectTypes>()))

@@ -140,7 +140,7 @@ namespace TAC_AI.AI.Movement.AICores
                     else
                     {   //Fly off the screen
                         Debug.Log("TACtical_AI: Tech " + this.pilot.Tank.name + "  Leaving scene!");
-                        Vector3 fFlat = this.pilot.Tank.rootBlockTrans.forward;
+                        Vector3 fFlat = this.pilot.Tank.transform.forward;
                         fFlat.y = 0;
                         pilot.AirborneDest = (fFlat.normalized * 1000) + this.pilot.Tank.boundsCentreWorldNoCheck;
                     }

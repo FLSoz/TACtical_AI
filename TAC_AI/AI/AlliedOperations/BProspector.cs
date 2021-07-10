@@ -83,7 +83,7 @@ namespace TAC_AI.AI.AlliedOperations
 
             if (thisInst.areWeFull || thisInst.ActionPause > 10)
             {
-                thisInst.foundBase = AIECore.FetchClosestHarvestReceiver(tank.rootBlockTrans.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
+                thisInst.foundBase = AIECore.FetchClosestHarvestReceiver(tank.transform.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
                 if (!thisInst.foundBase)
                 {
                     hasMessaged = AIECore.AIMessage(hasMessaged, "TACtical_AI: AI " + tank.name + ":  Searching for nearest base!");
@@ -95,7 +95,7 @@ namespace TAC_AI.AI.AlliedOperations
                 /*
                 else if (thisInst.lastBasePos.IsNull())
                 {
-                    thisInst.foundBase = AIEnhancedCore.FetchClosestHarvestReceiver(tank.rootBlockTrans.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
+                    thisInst.foundBase = AIEnhancedCore.FetchClosestHarvestReceiver(tank.transform.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
                     thisInst.lastBaseExtremes = AIEnhancedCore.Extremes(thisInst.theBase.blockBounds.extents); 
                     thisInst.EstTopSped = 1;//slow down the clock to reduce lagg
                     return;
@@ -180,11 +180,11 @@ namespace TAC_AI.AI.AlliedOperations
                 if (!thisInst.foundGoal)
                 {
                     thisInst.EstTopSped = 1;//slow down the clock to reduce lagg
-                    thisInst.foundGoal = AIECore.FetchClosestResource(tank.rootBlockTrans.position, tank.Radar.Range, out thisInst.theResource);
+                    thisInst.foundGoal = AIECore.FetchClosestResource(tank.transform.position, tank.Radar.Range, out thisInst.theResource);
                     hasMessaged = AIECore.AIMessage(hasMessaged, "TACtical_AI: AI " + tank.name + ":  Scanning for resources...");
                     if (!thisInst.foundGoal)
                     {
-                        thisInst.foundBase = AIECore.FetchClosestHarvestReceiver(tank.rootBlockTrans.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
+                        thisInst.foundBase = AIECore.FetchClosestHarvestReceiver(tank.transform.position, tank.Radar.Range + 150, out thisInst.lastBasePos, out thisInst.theBase);
                         if (thisInst.theBase == null)
                             return; // There's no base!
                         thisInst.lastBaseExtremes = AIECore.Extremes(thisInst.theBase.blockBounds.extents);

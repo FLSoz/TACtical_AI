@@ -43,7 +43,7 @@ namespace TAC_AI.AI.Movement.AICores
                     this.controller.Helper.lastDestination = this.controller.Helper.lastEnemy.transform.position;
                     this.controller.Helper.MinimumRad = 0;
                     //Vector3 aimTo = (this.controller.Helper.lastEnemy.transform.position - this.controller.Tank.transform.position).normalized;
-                    //float driveDyna = Mathf.Abs(Mathf.Clamp((this.controller.Tank.rootBlockTrans.forward - aimTo).magnitude / 1.5f, -1, 1));
+                    //float driveDyna = Mathf.Abs(Mathf.Clamp((this.controller.Tank.transform.forward - aimTo).magnitude / 1.5f, -1, 1));
                     //thisControl.m_Movement.FacePosition(this.controller.Tank, this.controller.Helper.lastEnemy.transform.position, driveDyna);//Face the music
                 }
                 else if (this.controller.Helper.MTMimicHostAvail && this.controller.Helper.LastCloseAlly != null && this.controller.Helper.DediAI == AIType.MTMimic)
@@ -52,7 +52,7 @@ namespace TAC_AI.AI.Movement.AICores
                     this.controller.Helper.lastDestination = AIEPathing.GetDriveApproxAir(this.controller.Helper.LastCloseAlly, this.controller.Helper);
                     if (!(this.controller.Helper.lastDestination - this.controller.Tank.boundsCentreWorld).Approximately(Vector3.zero, 0.05f))
                     {
-                        if (Vector3.Dot(this.controller.Tank.rootBlockTrans.forward, (this.controller.Helper.lastDestination - this.controller.Tank.boundsCentreWorldNoCheck).normalized) >= 0)
+                        if (Vector3.Dot(this.controller.Tank.transform.forward, (this.controller.Helper.lastDestination - this.controller.Tank.boundsCentreWorldNoCheck).normalized) >= 0)
                         {
                             //Debug.Log("TACtical_AI:AI " + this.controller.Tank.name + ": Forwards");
                             this.controller.Helper.Steer = true;
@@ -289,7 +289,7 @@ namespace TAC_AI.AI.Movement.AICores
                         else  //ORBIT!
                         {
                             //Debug.Log("TACtical_AI: AI " + tank.name + ":  ORBITING!!!!");
-                            if (Vector3.Dot(thisInst.lastDestination - tank.boundsCentreWorldNoCheck, tank.rootBlockTrans.right) < 0)
+                            if (Vector3.Dot(thisInst.lastDestination - tank.boundsCentreWorldNoCheck, tank.transform.right) < 0)
                                 thisControl.m_Movement.FaceDirection(tank, Vector3.Cross(destDirect, Vector3.down), 1);
                             else
                                 thisControl.m_Movement.FaceDirection(tank, Vector3.Cross(destDirect, Vector3.up), 1);
@@ -357,14 +357,14 @@ namespace TAC_AI.AI.Movement.AICores
                     if (thisInst.BOOST)
                     {
                         thisControl.DriveControl = 1;
-                        if (Vector3.Dot(destDirect.normalized, tank.rootBlockTrans.forward) > 0.75f)
+                        if (Vector3.Dot(destDirect.normalized, tank.transform.forward) > 0.75f)
                             thisControl.m_Movement.FireBoosters(tank);
                     }
                     else if (thisInst.featherBoost)
                     {
                         if (thisInst.featherClock >= 25)
                         {
-                            if (Vector3.Dot(destDirect.normalized, tank.rootBlockTrans.forward) > 0.75f)
+                            if (Vector3.Dot(destDirect.normalized, tank.transform.forward) > 0.75f)
                                 thisControl.m_Movement.FireBoosters(tank);
                             thisInst.featherClock = 0;
                         }
@@ -374,14 +374,14 @@ namespace TAC_AI.AI.Movement.AICores
                 else if (thisInst.BOOST)
                 {
                     thisControl.DriveControl = 1;
-                    if (Vector3.Dot(destDirect.normalized, tank.rootBlockTrans.forward) > 0.75f)
+                    if (Vector3.Dot(destDirect.normalized, tank.transform.forward) > 0.75f)
                         thisControl.m_Movement.FireBoosters(tank);
                 }
                 else if (thisInst.featherBoost)
                 {
                     if (thisInst.featherClock >= 25)
                     {
-                        if (Vector3.Dot(destDirect.normalized, tank.rootBlockTrans.forward) > 0.75f)
+                        if (Vector3.Dot(destDirect.normalized, tank.transform.forward) > 0.75f)
                             thisControl.m_Movement.FireBoosters(tank);
                         thisInst.featherClock = 0;
                     }
@@ -402,11 +402,11 @@ namespace TAC_AI.AI.Movement.AICores
             //AI Steering Rotational
             Vector3 distDiff = thisInst.lastDestination - tank.trans.position;
             Vector3 turnVal;
-            Vector3 forwardFlat = tank.rootBlockTrans.forward;
+            Vector3 forwardFlat = tank.transform.forward;
             forwardFlat.y = 0;
             if (thisInst.Navi3DDirect == Vector3.zero)
             {   //keep upright!
-                turnVal = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(forwardFlat.normalized), tank.rootBlockTrans.InverseTransformDirection(Vector3.up)).eulerAngles;
+                turnVal = Quaternion.LookRotation(tank.transform.InverseTransformDirection(forwardFlat.normalized), tank.transform.InverseTransformDirection(Vector3.up)).eulerAngles;
                 //Convert turnVal to runnable format
                 if (turnVal.x > 180)
                     turnVal.x = -((turnVal.x - 360) / 180);
@@ -423,13 +423,13 @@ namespace TAC_AI.AI.Movement.AICores
             }
             else
             {   //for special cases we want to angle at the enemy
-                turnVal = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DDirect), tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DUp)).eulerAngles;
+                turnVal = Quaternion.LookRotation(tank.transform.InverseTransformDirection(thisInst.Navi3DDirect), tank.transform.InverseTransformDirection(thisInst.Navi3DUp)).eulerAngles;
 
-                Vector3 turnValUp = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(forwardFlat.normalized), tank.rootBlockTrans.InverseTransformDirection(Vector3.up)).eulerAngles;
+                Vector3 turnValUp = Quaternion.LookRotation(tank.transform.InverseTransformDirection(forwardFlat.normalized), tank.transform.InverseTransformDirection(Vector3.up)).eulerAngles;
                 if (thisInst.Navi3DUp == Vector3.up)
                 {
                     //Debug.Log("TACtical_AI: Forwards");
-                    if (!thisInst.FullMelee && Vector3.Dot(thisInst.Navi3DDirect, tank.rootBlockTrans.forward) < 0.6f)
+                    if (!thisInst.FullMelee && Vector3.Dot(thisInst.Navi3DDirect, tank.transform.forward) < 0.6f)
                     {
                         //If overtilt then try get back upright again
                         turnVal.x = turnValUp.x;
@@ -453,7 +453,7 @@ namespace TAC_AI.AI.Movement.AICores
                 }
                 else
                 {   //Using broadside tilting
-                    if (!thisInst.FullMelee && Vector3.Dot(thisInst.Navi3DUp, tank.rootBlockTrans.up) < 0.6f)
+                    if (!thisInst.FullMelee && Vector3.Dot(thisInst.Navi3DUp, tank.transform.up) < 0.6f)
                     {
                         //If overtilt then try get back upright again
                         turnVal.z = turnValUp.z;
@@ -461,7 +461,7 @@ namespace TAC_AI.AI.Movement.AICores
                             turnVal.z = -((turnVal.z - 360) / 180);
                         else
                             turnVal.z = -(turnVal.z / 180);
-                        Debug.Log("TACtical_AI: Broadside overloaded with value " + Vector3.Dot(thisInst.Navi3DUp, tank.rootBlockTrans.up));
+                        Debug.Log("TACtical_AI: Broadside overloaded with value " + Vector3.Dot(thisInst.Navi3DUp, tank.transform.up));
                     }
                     else
                     {
@@ -498,7 +498,7 @@ namespace TAC_AI.AI.Movement.AICores
                         control3D.m_State.m_InputRotation = turnVal;
                         if (thisInst.lastEnemy.IsNotNull())
                         {
-                            if (Vector3.Dot(thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck, tank.rootBlockTrans.right) < 0)
+                            if (Vector3.Dot(thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck, tank.transform.right) < 0)
                             {
                                 thisInst.Navi3DDirect = Vector3.Cross(Vector3.up, (thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized).normalized;
                                 thisInst.Navi3DUp = Vector3.Cross((thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, thisInst.Navi3DDirect).normalized;
@@ -544,7 +544,7 @@ namespace TAC_AI.AI.Movement.AICores
                         control3D.m_State.m_InputRotation = turnVal;
                         if (thisInst.lastEnemy.IsNotNull())
                         {
-                            if (Vector3.Dot(thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck, tank.rootBlockTrans.right) < 0)
+                            if (Vector3.Dot(thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck, tank.transform.right) < 0)
                             {
                                 thisInst.Navi3DDirect = Vector3.Cross(Vector3.up, (thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized).normalized;
                                 thisInst.Navi3DUp = Vector3.Cross((thisInst.lastEnemy.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, thisInst.Navi3DDirect).normalized;
@@ -679,14 +679,14 @@ namespace TAC_AI.AI.Movement.AICores
             else if (thisInst.BOOST)
             {
                 driveMultiplier = 1;
-                if (Vector3.Dot(driveVal, tank.rootBlockTrans.forward) > 0.75f)
+                if (Vector3.Dot(driveVal, tank.transform.forward) > 0.75f)
                     thisControl.m_Movement.FireBoosters(tank);
             }
             else if (thisInst.featherBoost)
             {
                 if (thisInst.featherClock >= 25)
                 {
-                    if (Vector3.Dot(driveVal, tank.rootBlockTrans.forward) > 0.75f)
+                    if (Vector3.Dot(driveVal, tank.transform.forward) > 0.75f)
                         thisControl.m_Movement.FireBoosters(tank);
                     thisInst.featherClock = 0;
                 }

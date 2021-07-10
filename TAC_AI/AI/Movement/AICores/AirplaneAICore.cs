@@ -45,7 +45,7 @@ namespace TAC_AI.AI.Movement.AICores
                 if (pilot.TargetGrounded)
                 {  // We previously disabled the ground offset terrain avoider and aim directly at the enemy
                     float dist = (thisInst.lastDestination - (tank.boundsCentreWorldNoCheck + (tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime))).magnitude;
-                    Vector3 Heading = tank.rootBlockTrans.InverseTransformDirection(thisInst.lastDestination - tank.boundsCentreWorldNoCheck);
+                    Vector3 Heading = tank.transform.InverseTransformDirection(thisInst.lastDestination - tank.boundsCentreWorldNoCheck);
                     if (pilot.ForcePitchUp)
                         pilot.PerformDiveAttack = 0; // too low and we break off from the attack
                     if (dist < 32)
@@ -137,7 +137,7 @@ namespace TAC_AI.AI.Movement.AICores
                     pilot.MainThrottle = 1;
                     this.pilot.UpdateThrottle(thisInst, thisControl);
                     AircraftUtils.AngleTowards(thisControl, thisInst, tank, pilot, pilot.AirborneDest);
-                    if (Vector3.Dot(tank.rootBlockTrans.forward, (pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized) > 0)
+                    if (Vector3.Dot(tank.transform.forward, (pilot.AirborneDest - tank.boundsCentreWorldNoCheck).normalized) > 0)
                     {
                         pilot.PerformUTurn = 0;
                         if (pilot.PerformDiveAttack == 1)
@@ -172,7 +172,7 @@ namespace TAC_AI.AI.Movement.AICores
                 {   // Fly to target
                     if ((this.pilot.Helper.lastDestination - this.pilot.Tank.boundsCentreWorldNoCheck).magnitude < pilot.DestSuccessRad)
                     {   //We are at target
-                        pilot.AirborneDest = this.pilot.Helper.lastDestination + (this.pilot.Tank.rootBlockTrans.forward * 100);
+                        pilot.AirborneDest = this.pilot.Helper.lastDestination + (this.pilot.Tank.transform.forward * 100);
                     }
                     else
                     {
@@ -187,7 +187,7 @@ namespace TAC_AI.AI.Movement.AICores
                 {   // Orbit last position
                     if ((pilot.AirborneDest - this.pilot.Tank.boundsCentreWorldNoCheck).magnitude < pilot.DestSuccessRad)
                     {   //We are at target
-                        pilot.AirborneDest = pilot.AirborneDest + (-this.pilot.Tank.rootBlockTrans.right * 50);
+                        pilot.AirborneDest = pilot.AirborneDest + (-this.pilot.Tank.transform.right * 50);
                     }
                     else
                     {
@@ -203,7 +203,7 @@ namespace TAC_AI.AI.Movement.AICores
 
             if (pilot.LargeAircraft || pilot.BankOnly)
             {
-                if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + ((this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime) * 5) - (Vector3.down * AIECore.Extremes(this.pilot.Tank.blockBounds.size)), pilot.AerofoilSluggishness + 25))
+                if (!AIEPathing.AboveHeightFromGround(this.pilot.Tank.boundsCentreWorldNoCheck + ((this.pilot.Tank.rbody.velocity * pilot.AerofoilSluggishness * Time.deltaTime) * 5) - (Vector3.down * AIECore.Extremes(this.pilot.Tank.blockBounds.size)), pilot.AerofoilSluggishness + 25 + this.pilot.TargetHeight))
                 {
                     pilot.ForcePitchUp = true;
                     pilot.AirborneDest += Vector3.up * (pilot.AirborneDest - this.pilot.Tank.boundsCentreWorldNoCheck).magnitude;
@@ -249,10 +249,10 @@ namespace TAC_AI.AI.Movement.AICores
                     Debug.Log("TACtical_AI: Tech " + this.pilot.Tank.name + " Arrived at destination");
 
                     Vector3 lFlat;
-                    if (this.pilot.Tank.rootBlockTrans.up.y > 0)
-                        lFlat = -this.pilot.Tank.rootBlockTrans.right + (this.pilot.Tank.rootBlockTrans.forward * 2);
+                    if (this.pilot.Tank.transform.up.y > 0)
+                        lFlat = -this.pilot.Tank.transform.right + (this.pilot.Tank.transform.forward * 2);
                     else
-                        lFlat = this.pilot.Tank.rootBlockTrans.right + (this.pilot.Tank.rootBlockTrans.forward * 2);
+                        lFlat = this.pilot.Tank.transform.right + (this.pilot.Tank.transform.forward * 2);
                     lFlat.y = 0.1f;
                     pilot.AirborneDest = pilot.AirborneDest + (lFlat * 50);
                 }
@@ -261,7 +261,7 @@ namespace TAC_AI.AI.Movement.AICores
                     this.pilot.Helper.lastDestination = AIEPathing.OffsetFromGroundA(this.pilot.Helper.lastDestination, this.pilot.Helper);
                     if ((this.pilot.Helper.lastDestination - this.pilot.Tank.boundsCentreWorldNoCheck).magnitude < pilot.DestSuccessRad)
                     {   //We are at target
-                        pilot.AirborneDest = this.pilot.Helper.lastDestination + (this.pilot.Tank.rootBlockTrans.forward * 100);
+                        pilot.AirborneDest = this.pilot.Helper.lastDestination + (this.pilot.Tank.transform.forward * 100);
                     }
                     else
                     {
@@ -282,7 +282,7 @@ namespace TAC_AI.AI.Movement.AICores
                     }
                     else
                     {   //Fly off the screen
-                        Vector3 fFlat = this.pilot.Tank.rootBlockTrans.forward;
+                        Vector3 fFlat = this.pilot.Tank.transform.forward;
                         fFlat.y = 0.25f;
                         pilot.AirborneDest = (fFlat.normalized * 1000) + this.pilot.Tank.boundsCentreWorldNoCheck;
                     }

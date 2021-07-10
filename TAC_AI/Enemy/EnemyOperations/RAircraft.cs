@@ -210,7 +210,7 @@ namespace TAC_AI.AI.Enemy.EnemyOperations
                 thisInst.Urgency += KickStart.AIClockPeriod / 5;
                 if (KickStart.isWeaponAimModPresent && mind.CommanderAttack == EnemyAttack.Circle && ((AIControllerAir) thisInst.MovementController).LargeAircraft)
                 {   // AC-130 broadside attack
-                    if (Mathf.Abs((tank.rootBlockTrans.right - aimTo).magnitude) < 0.25f || Mathf.Abs((tank.rootBlockTrans.right - aimTo).magnitude) > -0.25f || thisInst.Urgency >= 30)
+                    if (Mathf.Abs((tank.transform.right - aimTo).magnitude) < 0.25f || Mathf.Abs((tank.transform.right - aimTo).magnitude) > -0.25f || thisInst.Urgency >= 30)
                     {
                         thisInst.DANGER = true;
                         //thisInst.Urgency = 50;
@@ -219,7 +219,7 @@ namespace TAC_AI.AI.Enemy.EnemyOperations
                 }
                 else
                 {   // Normal Dogfighting
-                    if (Mathf.Abs((tank.rootBlockTrans.forward - aimTo).magnitude) < 0.25f || thisInst.Urgency >= 30)
+                    if (Mathf.Abs((tank.transform.forward - aimTo).magnitude) < 0.25f || thisInst.Urgency >= 30)
                     {
                         thisInst.DANGER = true;
                         //thisInst.Urgency = 50;

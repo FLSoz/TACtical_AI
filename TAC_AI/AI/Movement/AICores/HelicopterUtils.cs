@@ -21,11 +21,11 @@ namespace TAC_AI.AI.Movement.AICores
             forwardFlat.y = 0;
             if (ForceAccend)
             {
-                turnVal = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(forwardFlat), tank.rootBlockTrans.InverseTransformDirection(Vector3.one)).eulerAngles;
+                turnVal = Quaternion.LookRotation(tank.transform.InverseTransformDirection(forwardFlat), tank.transform.InverseTransformDirection(Vector3.one)).eulerAngles;
             }
             else
             {
-                turnVal = Quaternion.LookRotation(tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DDirect), tank.rootBlockTrans.InverseTransformDirection(thisInst.Navi3DUp)).eulerAngles;
+                turnVal = Quaternion.LookRotation(tank.transform.InverseTransformDirection(thisInst.Navi3DDirect), tank.transform.InverseTransformDirection(thisInst.Navi3DUp)).eulerAngles;
             }
 
             //Convert turnVal to runnable format
@@ -64,12 +64,12 @@ namespace TAC_AI.AI.Movement.AICores
             float xOffset = 0;
             if (thisInst.DriveDir == EDriveType.Perpendicular && thisInst.lastEnemy != null)
             {
-                if (tank.rootBlockTrans.InverseTransformVector(tank.rbody.velocity).x > 0)
+                if (tank.transform.InverseTransformVector(tank.rbody.velocity).x > 0)
                     xOffset = 0.4f;
                 else
                     xOffset = -0.4f;
             }
-            Vector3 DriveVar = tank.rootBlockTrans.InverseTransformVector(-tank.rbody.velocity) / pilot.PropLerpValue;
+            Vector3 DriveVar = tank.transform.InverseTransformVector(-tank.rbody.velocity) / pilot.PropLerpValue;
             DriveVar.x = Mathf.Clamp(DriveVar.x + xOffset, -1, 1);
             DriveVar.z = Mathf.Clamp(DriveVar.z, -1, 1);
             DriveVar.y = 0;
@@ -96,20 +96,20 @@ namespace TAC_AI.AI.Movement.AICores
             Vector3 rFlat;
 
             // X-axis turning
-            if (tank.rootBlockTrans.up.y > 0)
-                rFlat = tank.rootBlockTrans.right;
+            if (tank.transform.up.y > 0)
+                rFlat = tank.transform.right;
             else
-                rFlat = -tank.rootBlockTrans.right;
+                rFlat = -tank.transform.right;
             if (thisInst.DriveDir == EDriveType.Perpendicular)
             {   // orbit while firing
-                if (tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).x >= 0)
-                    rFlat.y = Mathf.Clamp((tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed)) - 0.5f, -0.75f, 0.75f);
+                if (tank.transform.InverseTransformPoint(tank.rbody.velocity).x >= 0)
+                    rFlat.y = Mathf.Clamp((tank.transform.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed)) - 0.5f, -0.75f, 0.75f);
                 else
-                    rFlat.y = Mathf.Clamp((tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed)) + 0.5f, -0.75f, 0.75f);
+                    rFlat.y = Mathf.Clamp((tank.transform.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed)) + 0.5f, -0.75f, 0.75f);
             }
             else
-                rFlat.y = Mathf.Clamp(tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed), -0.75f, 0.75f);
-            directUp = Vector3.Cross(tank.rootBlockTrans.forward, rFlat.normalized).normalized;
+                rFlat.y = Mathf.Clamp(tank.transform.InverseTransformPoint(tank.rbody.velocity).x / (10 / pilot.SlowestPropLerpSpeed), -0.75f, 0.75f);
+            directUp = Vector3.Cross(tank.transform.forward, rFlat.normalized).normalized;
 
 
             // Other axis turning
@@ -123,11 +123,11 @@ namespace TAC_AI.AI.Movement.AICores
                 if (pilot.LowerEngines)
                     fFlat.y = 0;
                 else if (thisInst.MoveFromObjective || thisInst.AdviseAway)
-                    fFlat.y = Mathf.Clamp((tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed)) + 0.1f, -0.35f, 0.35f);
+                    fFlat.y = Mathf.Clamp((tank.transform.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed)) + 0.1f, -0.35f, 0.35f);
                 else if (thisInst.ProceedToObjective)
-                    fFlat.y = Mathf.Clamp((tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed)) - 0.1f, -0.35f, 0.35f);
+                    fFlat.y = Mathf.Clamp((tank.transform.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed)) - 0.1f, -0.35f, 0.35f);
                 else
-                    fFlat.y = Mathf.Clamp(tank.rootBlockTrans.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed), -0.35f, 0.35f);
+                    fFlat.y = Mathf.Clamp(tank.transform.InverseTransformPoint(tank.rbody.velocity).z / (10 / pilot.SlowestPropLerpSpeed), -0.35f, 0.35f);
                 */
             }
             // Because tilting forwards too hard causes the chopper to stall on some builds

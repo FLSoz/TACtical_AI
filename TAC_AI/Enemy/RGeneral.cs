@@ -203,7 +203,7 @@ namespace TAC_AI.AI.Enemy
                 thisInst.Urgency += KickStart.AIClockPeriod / 5;
                 if (thisInst.SideToThreat)
                 {
-                    if (Mathf.Abs((tank.rootBlockTrans.right - aimTo).magnitude) < 0.15f || Mathf.Abs((tank.rootBlockTrans.right - aimTo).magnitude) > -0.15f || thisInst.Urgency >= 30)
+                    if (Mathf.Abs((tank.transform.right - aimTo).magnitude) < 0.15f || Mathf.Abs((tank.transform.right - aimTo).magnitude) > -0.15f || thisInst.Urgency >= 30)
                     {
                         thisInst.DANGER = true;
                         thisInst.Urgency = 30;
@@ -211,7 +211,7 @@ namespace TAC_AI.AI.Enemy
                 }
                 else
                 {
-                    if (Mathf.Abs((tank.rootBlockTrans.forward - aimTo).magnitude) < 0.15f || thisInst.Urgency >= 30)
+                    if (Mathf.Abs((tank.transform.forward - aimTo).magnitude) < 0.15f || thisInst.Urgency >= 30)
                     {
                         thisInst.DANGER = true;
                         thisInst.Urgency = 30;
