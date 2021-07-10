@@ -52,6 +52,7 @@ namespace TAC_AI.AI
         public List<ModuleAirBrake> Brakes;
         public List<ModuleWing> Wings;
         public bool NoProps = false;            // Do we have to rely on fuel only?
+        public bool ReliesBoost = false;        // Do we rely on boosters to make up the difference?
         public bool SkewedFlightCenter = false; // Are we going to struggle when turning?
 
         public Vector3 PropBias = Vector3.zero;
@@ -70,7 +71,7 @@ namespace TAC_AI.AI
 
         /// <summary> IN m/s !!!</summary>
         public const float Stallspeed = 40;
-        public const float GroundAttackStagingDist = 250;
+        public const float GroundAttackStagingDist = 150;
 
         //Data Gathering
         public float SlowestPropLerpSpeed = 1;
@@ -89,9 +90,9 @@ namespace TAC_AI.AI
         public bool PoorThrust = false;
         public float MaxBankAngle = 45.0f;
         public float MaxPitchAngle = 80.0f;
-        public float TargetHeight;
+        public float TargetHeight = 20.0f;
         public float BoosterThrustBias = 0.5f;
-        public float NoStallThreshold = 1.5f;
+        public float NoStallThreshold = 2.0f;   // upgrade to 2.0 for worst case of angled relative to ground
         public bool ForcePitchUp = false;
         public bool TakeOff = false;
         public bool Grounded = false;
@@ -267,7 +268,9 @@ namespace TAC_AI.AI
             }
 
             float totalThrust = (fanThrust + boosterThrust * this.BoosterThrustBias);
-            float thrustDeficit = (this.NoStallThreshold * this.Tank.rbody.mass * Physics.gravity).sqrMagnitude - totalThrust * totalThrust;
+            float requiredThrust = (this.NoStallThreshold * this.Tank.rbody.mass * Physics.gravity).sqrMagnitude;
+            float thrustDeficit = requiredThrust - totalThrust * totalThrust;
+            this.ReliesBoost = requiredThrust > fanThrust * fanThrust;
             this.PoorThrust = thrustDeficit > 0;
             if (this.PoorThrust)
             {
@@ -326,6 +329,7 @@ namespace TAC_AI.AI
             {
                 LargeAircraft = false;
             }
+            this.TargetHeight = AIECore.Extremes(Tank.blockBounds.size)/2 + 20.0f;
 
             AerofoilSluggishness = 30 / aerofoilSpeed;
             if (FlyStyle == FlightType.Helicopter)

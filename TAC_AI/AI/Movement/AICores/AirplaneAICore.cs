@@ -60,7 +60,7 @@ namespace TAC_AI.AI.Movement.AICores
                     }
                     else if (pilot.PerformDiveAttack == 1)
                     {
-                        Debug.Log("TACtical_AI: Tech " + tank.name + "  Aiming at target!");
+                        Debug.Log("TACtical_AI: Tech " + tank.name + $"  Aiming at target! Large Aircraft? {pilot.LargeAircraft}, Poor Thrust? {pilot.PoorThrust}");
                         if (Heading.z > 0.25f)
                             pilot.PerformDiveAttack = 1; // too low and we break off from the attack
                         if (pilot.PerformUTurn > 0)

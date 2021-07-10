@@ -14,7 +14,7 @@ namespace TAC_AI.AI.Movement.AICores
 
         public static void UTurn(TankControl thisControl, AIECore.TankAIHelper thisInst, Tank tank, AIControllerAir pilot)
         {
-            //Debug.Log("TACtical_AI: Tech " + tank.name + "  U-Turn level " + pilot.PerformUTurn + "  throttle " + pilot.CurrentThrottle);
+            Debug.Log("TACtical_AI: Tech " + tank.name + "  U-Turn level " + pilot.PerformUTurn + "  throttle " + pilot.CurrentThrottle);
             pilot.MainThrottle = 1;
             pilot.UpdateThrottle(thisInst, thisControl);
             if (tank.transform.InverseTransformVector(tank.rbody.velocity).z < AIControllerAir.Stallspeed)
@@ -150,7 +150,7 @@ namespace TAC_AI.AI.Movement.AICores
         public static void AngleTowards(TankControl thisControl, AIECore.TankAIHelper thisInst, Tank tank, AIControllerAir pilot, Vector3 position)
         {
             //AI Steering Rotational
-            TankControl.ControlState control3D = (TankControl.ControlState) AircraftUtils.controlGet.GetValue(thisControl);
+            TankControl.ControlState control3D = (TankControl.ControlState)AircraftUtils.controlGet.GetValue(thisControl);
 
             Vector3 adjTarget = position;
             if (pilot.ForcePitchUp)
@@ -160,7 +160,7 @@ namespace TAC_AI.AI.Movement.AICores
             Vector3 clampedForward = adjTarget - tank.boundsCentreWorldNoCheck;
 
             thisInst.Navi3DDirect = clampedForward.normalized;
-            
+
             float targetHeight = clampedForward.y;
             // clamp pitch so no stall
             if (targetHeight > 0.0f)
@@ -220,17 +220,33 @@ namespace TAC_AI.AI.Movement.AICores
             //Turn our work in to processing
             //Debug.Log("TACtical_AI: Tech " + tank.name + " steering" + turnVal);
             control3D.m_State.m_InputMovement = DriveVar;
-            
+
             // Force full thrust if it's poor
-            if (pilot.PoorThrust || pilot.CurrentThrottle > 0.5f)
-            {
-                control3D.m_State.m_BoostProps = true;
+            if (!tank.beam.enabled) {
+                if (pilot.PoorThrust || (pilot.SlowestPropLerpSpeed < 0.1f && pilot.PropBias.z > 0.75f && pilot.CurrentThrottle > 0.75f))
+                {
+                    thisControl.BoostControlProps = true;
+                }
+                else
+                {
+                    thisControl.BoostControlProps = false;
+                }
+
+                if (thisInst.featherBoost)
+                {
+                    if (thisInst.featherClock >= 25)
+                    {
+                        if (pilot.CurrentThrottle > 0.5f)
+                        {
+                            thisControl.m_Movement.FireBoosters(tank);
+                        }
+                        thisInst.featherClock = 0;
+                    }
+                    thisInst.featherClock++;
+                }
             }
 
-            if (pilot.SlowestPropLerpSpeed < 0.1f && pilot.PropBias.z > 0.75f && pilot.CurrentThrottle > 0.75f)
-                thisControl.BoostControlProps = true;
-            else
-                thisControl.BoostControlProps = false;
+            control3D.m_State.m_ThrottleValues.y = thisControl.BoostControlProps || pilot.CurrentThrottle > 0.75f ? 1.0f : pilot.CurrentThrottle;
 
             controlGet.SetValue(tank.control, control3D);
             return;
@@ -258,13 +274,20 @@ namespace TAC_AI.AI.Movement.AICores
                         {   // Save fuel for chasing the enemy
                             if (pilot.NoProps)
                             {
+                                thisInst.featherBoost = false;
                                 if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                     thisInst.BOOST = true;
                                 else
                                     thisInst.BOOST = false;
                             }
+                            else if (pilot.ReliesBoost)
+                            {
+                                thisInst.featherBoost = true;
+                                thisInst.BOOST = false;
+                            }
                             else
                             {
+                                thisInst.featherBoost = false;
                                 if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                     thisInst.BOOST = true;
                                 else
@@ -272,7 +295,10 @@ namespace TAC_AI.AI.Movement.AICores
                             }
                         }
                         else
+                        {
+                            thisInst.featherBoost = false;
                             thisInst.BOOST = false;
+                        }
                         return;
                     }
                 }
@@ -297,13 +323,20 @@ namespace TAC_AI.AI.Movement.AICores
 
                         if (pilot.NoProps)
                         {
+                            thisInst.featherBoost = false;
                             if (!pilot.ForcePitchUp && foreTarg > Extremes && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                 thisInst.BOOST = true;
                             else
                                 thisInst.BOOST = false;
                         }
+                        else if (pilot.ReliesBoost)
+                        {
+                            thisInst.featherBoost = true;
+                            thisInst.BOOST = false;
+                        }
                         else
                         {
+                            thisInst.featherBoost = false;
                             if (!pilot.ForcePitchUp && throttleToSet > 1.25f && tank.rbody.velocity.y > -10 && Vector3.Dot((target.tank.boundsCentreWorldNoCheck - tank.boundsCentreWorldNoCheck).normalized, tank.transform.forward) > 0.6)
                                 thisInst.BOOST = true;
                             else
