@@ -1,9 +1,0 @@
-﻿{
-  "Id": "legionite.tactical_ai",
-  "DisplayName": "TAC AI",
-  "Author": "Legionite",
-  "Version": "0.1.0",
-  "Enable": true,
-  "AssemblyName": "TAC_AI.dll",
-  "EntryMethod": "TAC_AI.KickStart.Main"
-}
