@@ -1098,14 +1098,14 @@ namespace TAC_AI.AI.Enemy
                 {
                     if (jet.spinDelta <= 10)
                     {
-                        biasDirection -= tank.rootBlockTrans.InverseTransformDirection(jet.EffectorForwards) * jet.force;
+                        biasDirection -= tank.transform.InverseTransformDirection(jet.EffectorForwards) * jet.force;
                     }
                 }
                 List<BoosterJet> boosts = module.transform.GetComponentsInChildren<BoosterJet>().ToList();
                 foreach (BoosterJet boost in boosts)
                 {
                     //We have to get the total thrust in here accounted for as well because the only way we CAN boost is ALL boosters firing!
-                    boostBiasDirection -= tank.rootBlockTrans.InverseTransformDirection(boost.transform.TransformDirection(boost.LocalBoostDirection));
+                    boostBiasDirection -= tank.transform.InverseTransformDirection(boost.transform.TransformDirection(boost.LocalBoostDirection));
                 }
             }
             boostBiasDirection.Normalize();
